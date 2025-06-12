@@ -9,9 +9,20 @@ import docProcessingRouter from "./routes/docProcessing.route.js";
 
 const app = express();
 
+const allowedOrigins = [
+  'http://localhost:4200',
+  'http://localhost:3000',
+  'https://app.fiscalcloud.co.zw'
+];
 app.use(cors({
-    origin: 'http://localhost:4200'|"http:localhost:3000"|"https://app.fiscalcloud.co.zw ", // or use a list of domains
-    credentials: true,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
 }));
 // Built in node js middleware
 app.use(express.json());
