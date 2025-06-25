@@ -50,7 +50,7 @@ import { parsePdf } from "../services/parsePdf.js";
 
   } catch (error) {
     console.error("Upload error:", error);
-    return res.status(500).json({
+    return res.status(422).json({
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
     });
