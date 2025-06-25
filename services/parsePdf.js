@@ -17,7 +17,11 @@ export async function parsePdf({ pdfUrl }) {
              
           {
             type: 'text',
-            text: `Extract the data from the VAT certificate 
+            text: `
+              Make sure the document is called VAT REGISTRATION CERTIFICATE or VAT CERTIFICATE or any variation. 
+            Ensure that the document is not an invoice, receipt, or credit note or any OTHER DOCUMENT. If document is not specifically a vat certificate terminate the process immediately and return an error message that says it is not a vat certificate.
+            If and only if it is a vat certificate then:
+            Extract the data from the VAT certificate 
             Your job is to extract and structure the following:
 - Tax Payer Name: The name under 'Taxpayer Name' or 'Name of Registered Operator'
 - Trade Name: The name under 'Trade Name' or 'Trading as'
@@ -52,7 +56,7 @@ You must detect OCR errors, handle different formats and languages, and return r
 
   const jsonMatch = textContent.text.match(/\{[\s\S]*?\}/);
   if (!jsonMatch) {
-    throw new Error("No JSON found in Claude's response.");
+    throw new Error("INVALID DOCUMENT.");
   }
 
   try {
