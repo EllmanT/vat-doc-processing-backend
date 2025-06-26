@@ -45,12 +45,14 @@ import { parsePdf } from "../services/parsePdf.js";
     return res.status(200).json({
       message: "Document processed successfully",
       success: true,
+      statusCode:200,
       data,
     });
 
   } catch (error) {
     console.error("Upload error:", error);
     return res.status(422).json({
+      statusCode:422,
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
     });
