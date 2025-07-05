@@ -12,7 +12,8 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:4200',
   'http://localhost:3000',
-  'https://app.fiscalcloud.co.zw'
+  'https://app.fiscalcloud.co.zw',
+  'https://staging.fiscalcloud.co.zw'
 ];
 app.use(cors({
   origin: (origin, callback) => {
