@@ -7,7 +7,9 @@ const anthropic = new Anthropic({
 
 export async function parsePdf({ pdfUrl }) {
   const response = await anthropic.messages.create({
-          model: "claude-3-5-sonnet-20241022",
+          // model: "claude-3-5-sonnet-20241022",
+          // model: "claude-3-7-sonnet-20250219",
+          model: "claude-3-7-sonnet-latest",
     max_tokens: 3094,
     temperature: 0,
     messages: [
