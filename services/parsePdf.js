@@ -1,76 +1,74 @@
-// lib/parsePdf.ts
 import Anthropic from '@anthropic-ai/sdk';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY, // set this in .env.local
 });
-
 export async function parsePdf({ pdfUrl }) {
   const response = await anthropic.messages.create({
-          // model: "claude-3-5-sonnet-20241022",
-          // model: "claude-3-7-sonnet-20250219",
-          model: "claude-3-7-sonnet-latest",
-    max_tokens: 3094,
+    model: 'claude-3-7-sonnet-latest',
+    max_tokens: 2048,
     temperature: 0,
+    tools: [
+      {
+        name: "extract_registration_info",
+        description: "Extract structured registration data from a ZIMRA VAT certificate.",
+        input_schema: {
+          type: "object",
+          properties: {
+            taxPayerName: { type: "string" },
+            tradeName: { type: "string" },
+            tinNumber: { type: "string" },
+            vatNumber: { type: "string" }
+          },
+          required: ["taxPayerName", "tradeName", "tinNumber", "vatNumber"]
+        }
+      }
+    ],
+    tool_choice: { type: "auto" },
     messages: [
       {
         role: 'user',
         content: [
-             
           {
             type: 'text',
             text: `
-              Make sure the document is called VAT REGISTRATION CERTIFICATE or VAT CERTIFICATE or any variation. 
-            Ensure that the document is not an invoice, receipt, or credit note or any OTHER DOCUMENT. If document is not specifically a vat certificate terminate the process immediately and return an error message that says it is not a vat certificate.
-            If and only if it is a vat certificate then:
-            Extract the data from the VAT certificate 
-            Your job is to extract and structure the following:
-- Tax Payer Name: The name under 'Taxpayer Name' or 'Name of Registered Operator'
-- Trade Name: The name under 'Trade Name' or 'Trading as'
-- TIN Number: 10-digit starting with 200
-- VAT Number: 9-digit starting with 220
-You must detect OCR errors, handle different formats and languages, and return results in structured JSON
-            and return the structured output as follows:
-{
-  "taxPayerName": "Tax Payer Name",
-  "tradeName": "Trade Name",
-  "tinNumber": "2000111222",
-  "vatNumber": "220123123"
-}`,
+You are a document classifier and extractor.
+
+First: **Determine if this document is a VAT REGISTRATION CERTIFICATE**, also known as "VAT Certificate", issued by ZIMRA (Zimbabwe Revenue Authority). Reject any other documents like invoices, Tax Certificate, receipts, or credit notes or any others.
+
+Second: If and only if it is a VAT certificate, extract and return the following using the extract_registration_info tool:
+- Tax Payer Name: Look for labels like "Taxpayer Name" or "Name of Registered Operator"
+- Trade Name: Often labeled as "Trade Name" or "Trading As"
+- TIN Number: Must be a 10-digit number starting with 200
+- VAT Number: Must be a 9-digit number starting with 220
+
+Use OCR tolerance, correct common scan errors, and ignore invalid documents. Do not guess. If the certificate is not valid or complete, DO NOT call the tool.
+`
           },
           {
             type: 'document',
             source: {
               type: 'url',
-              url: pdfUrl,
-            },
-          },
-        ],
-      },
-    ],
+              url: pdfUrl
+            }
+          }
+        ]
+      }
+    ]
   });
 
-  const textContent = response.content.find((block) => block.type === 'text');
+  const toolUse = response.content.find(block => block.type === 'tool_use');
 
-  if (!textContent || !('text' in textContent)) {
-    throw new Error("No valid text response from Claude.");
+  if (!toolUse || !toolUse.input) {
+    throw new Error("Document rejected or not a valid VAT certificate.");
   }
 
-  const jsonMatch = textContent.text.match(/\{[\s\S]*?\}/);
-  if (!jsonMatch) {
-    throw new Error("INVALID DOCUMENT.");
-  }
+  const data = toolUse.input;
 
-  try {
-    const data = JSON.parse(jsonMatch[0]);
-    
-    return {
-      regOperator: data.taxPayerName,
-      regTradeName: data.tradeName,
-      tinNumber: data.tinNumber,
-      vatNumber: data.vatNumber,
-    };
-  } catch (error) {
-    throw new Error("Failed to parse JSON from Claude output: " + error);
-  }
+  return {
+    regOperator: data.taxPayerName,
+    regTradeName: data.tradeName,
+    tinNumber: data.tinNumber,
+    vatNumber: data.vatNumber
+  };
 }
