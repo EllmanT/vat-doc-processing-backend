@@ -39,7 +39,7 @@ First: **Determine if this document is a VAT REGISTRATION CERTIFICATE**, also kn
 Second: If and only if it is a VAT certificate, extract and return the following using the extract_registration_info tool:
 - Tax Payer Name: Look for labels like "Taxpayer Name" or "Name of Registered Operator"
 - Trade Name: Often labeled as "Trade Name" or "Trading As"
-- TIN Number: Must be a 10-digit number starting with 200
+- TIN Number: Must be a 10-digit number starting with 200 or 100
 - VAT Number: Must be a 9-digit number starting with 220
 
 Use OCR tolerance, correct common scan errors, and ignore invalid documents. Do not guess. If the certificate is not valid or complete, DO NOT call the tool.
