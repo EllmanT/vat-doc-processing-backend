@@ -13,6 +13,7 @@ const allowedOrigins = [
   'http://localhost:4200',
   'http://localhost:3000',
   'https://app.fiscalcloud.co.zw',
+  'https://fiscalcloud.co.zw',
   'https://staging.fiscalcloud.co.zw'
 ];
 app.use(cors({
