@@ -13,15 +13,10 @@ const allowedOrigins = [
   'http://localhost:4200',
   'http://localhost:3000',
   'https://app.fiscalcloud.co.zw',
-  'https://www.app.fiscalcloud.co.zw',
-  'https://staging.fiscalcloud.co.zw',
-  'https://www.staging.fiscalcloud.co.zw',
   'https://fiscalcloud.co.zw',
-  'https://www.fiscalcloud.co.zw'
+  'https://staging.fiscalcloud.co.zw'
 ];
-
-// Handle preflight OPTIONS requests explicitly for Vercel
-app.options('*', cors({
+app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
