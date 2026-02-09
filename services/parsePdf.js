@@ -11,11 +11,14 @@ export async function parsePdf({ pdfUrl }) {
     tools: [
       {
         name: "extract_registration_info",
-        description: "Extract structured registration data from a ZIMRA VAT or TIN registration certificate.",
+        description: "Extract structured registration data from a ZIMRA VAT, TIN registration, or Tax Clearance certificate.",
         input_schema: {
           type: "object",
           properties: {
-            docType: { type: "string", enum: ["VAT_CERTIFICATE", "TIN_CERTIFICATE"] },
+            docType: {
+              type: "string",
+              enum: ["VAT_CERTIFICATE", "TIN_CERTIFICATE", "TAX_CLEARANCE_CERTIFICATE"]
+            },
             taxPayerName: { type: "string" },
             tradeName: { type: "string" },
             tinNumber: { type: "string" },
@@ -35,18 +38,22 @@ export async function parsePdf({ pdfUrl }) {
             text: `
 You are a document classifier and extractor.
 
-First: **Determine if this document is either**:
-- a VAT REGISTRATION CERTIFICATE ("VAT Certificate") issued by ZIMRA (Zimbabwe Revenue Authority), or
+First: **Determine if this document is any ONE of the following supported certificate types**:
+- a VAT REGISTRATION CERTIFICATE ("VAT Certificate") issued by ZIMRA (Zimbabwe Revenue Authority); heading usually contains "VAT REGISTRATION CERTIFICATE".
 - a ZIMRA TIN / Taxpayer Registration Certificate ("TIN certificate").
+- a TAX CLEARANCE CERTIFICATE (often appears as "TAX CLEARANCE CERTIFICATE" or "TAX CLEARANCE CERTIFICATE (ITF263)").
 
-Reject any other documents like invoices, generic Tax Certificates that are not TIN registration certificates, receipts, or credit notes, or any others.
+Reject any other documents like invoices, generic Tax Certificates that are not these registration/clearance certificates, receipts, or credit notes, or any others.
 
-Second: If and only if it is one of these two supported certificate types, extract and return the following using the extract_registration_info tool:
-- docType: Use "VAT_CERTIFICATE" for VAT registration certificates and "TIN_CERTIFICATE" for TIN registration certificates.
+Second: If and only if it is one of these supported certificate types, extract and return the following using the extract_registration_info tool:
+- docType:
+  - Use "VAT_CERTIFICATE" for VAT registration certificates.
+  - Use "TIN_CERTIFICATE" for TIN registration certificates.
+  - Use "TAX_CLEARANCE_CERTIFICATE" for Tax Clearance certificates (including ITF263).
 - Tax Payer Name: Look for labels like "Taxpayer Name" or "Name of Registered Operator".
 - Trade Name: Often labeled as "Trade Name" or "Trading As".
 - TIN Number: Must be a 10-digit number starting with 200 or 100.
-- VAT Number: For VAT certificates only, must be a 9-digit number starting with 220. For TIN certificates there is no VAT Number, so do NOT guess or fabricate one; if no VAT Number is present, leave this field empty.
+- VAT Number: For VAT certificates only, must be a 9-digit number starting with 220. For TIN certificates and Tax Clearance certificates there is no VAT Number, so do NOT guess or fabricate one; if no VAT Number is present, leave this field empty.
 
 Use OCR tolerance, correct common scan errors, and ignore invalid or incomplete documents. Do not guess. If the certificate is not valid or not one of the supported certificate types, DO NOT call the tool.
 `
@@ -66,7 +73,7 @@ Use OCR tolerance, correct common scan errors, and ignore invalid or incomplete 
   const toolUse = response.content.find(block => block.type === 'tool_use');
 
   if (!toolUse || !toolUse.input) {
-    throw new Error("Document rejected or not a supported certificate type (VAT or TIN).");
+    throw new Error("Document rejected or not a supported certificate type (VAT, TIN, or Tax Clearance).");
   }
 
   const data = toolUse.input;
