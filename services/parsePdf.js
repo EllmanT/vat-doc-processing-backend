@@ -78,6 +78,14 @@ Use OCR tolerance, correct common scan errors, and ignore invalid or incomplete 
 
   const data = toolUse.input;
 
+  // For Tax Clearance certificates only:
+  // If Trade Name is not present in the document / extraction, default it to the Tax Payer Name.
+  if (data.docType === "TAX_CLEARANCE_CERTIFICATE") {
+    if (!data.tradeName || data.tradeName.trim() === "") {
+      data.tradeName = data.taxPayerName;
+    }
+  }
+
   return {
     docType: data.docType,
     regOperator: data.taxPayerName,
