@@ -5,7 +5,7 @@ const anthropic = new Anthropic({
 });
 export async function parsePdf({ pdfUrl }) {
   const response = await anthropic.messages.create({
-    model: 'claude-3-7-sonnet-latest',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 2048,
     temperature: 0,
     tools: [
@@ -77,14 +77,6 @@ Use OCR tolerance, correct common scan errors, and ignore invalid or incomplete 
   }
 
   const data = toolUse.input;
-
-  // For Tax Clearance certificates only:
-  // If Trade Name is not present in the document / extraction, default it to the Tax Payer Name.
-  if (data.docType === "TAX_CLEARANCE_CERTIFICATE") {
-    if (!data.tradeName || data.tradeName.trim() === "") {
-      data.tradeName = data.taxPayerName;
-    }
-  }
 
   return {
     docType: data.docType,
