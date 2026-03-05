@@ -88,7 +88,7 @@ Use OCR tolerance, correct common scan errors, and ignore invalid or incomplete 
   return {
     docType: data.docType,
     regOperator: data.taxPayerName,
-    regTradeName: data.tradeName,
+    regTradeName: data.tradeName ?? data.taxPayerName,
     tinNumber: data.tinNumber,
     vatNumber: data.vatNumber && data.vatNumber.trim() !== "" ? data.vatNumber : null
   };
