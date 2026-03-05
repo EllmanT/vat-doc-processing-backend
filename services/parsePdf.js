@@ -85,6 +85,10 @@ Use OCR tolerance, correct common scan errors, and ignore invalid or incomplete 
     }
   }
 
+  if (data.tradeName === "" || data.tradeName === null || data.tradeName === undefined) {
+    data.tradeName = data.taxPayerName;
+  }
+
   return {
     docType: data.docType,
     regOperator: data.taxPayerName,
