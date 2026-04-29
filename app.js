@@ -14,7 +14,8 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://app.fiscalcloud.co.zw',
   'https://fiscalcloud.co.zw',
-  'https://staging.fiscalcloud.co.zw'
+  'https://staging.fiscalcloud.co.zw',
+  'https://e-invoicing.axishub.co.zw'
 ];
 app.use(cors({
   origin: (origin, callback) => {
